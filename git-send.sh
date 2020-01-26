@@ -10,42 +10,68 @@
 
 # var
 echo_bransh=$(git branch)
-
 branch=${echo_bransh:2}
+
+# read folder_name <<< `basename $(pwd)`
+read folder_name <<< $(basename $(pwd))
 origin="https://username:password@myrepository.biz/file.git"
 
 add=$1
 options=$2
-comments=$2
+comments=$3
+
+# create array from arguments => 
+# 1)
+  # string="a,b,s"
+  # IFS=',' read -a array <<< "$var"
+  # echo ${array[@]}
+# 2)
+  # var2=${string//,/' '}
+  # array=($var2)
+  # echo ${array[1]}
+
 
 # start
-if [ add == '*' -o add == '-A']
-  then
-    git add $add
-  else
-    add_string=${1:1:-1}
-    add_to_array=${add_string//,/' '} 	# // - global; replace ',' to ' '
-    add_array=($add_to_array) # fixed
-   # add ...
+if [ "$add" = '_' ]
+    then
+       add_echo="git add => no params"
+  elif [ "${add:0:2}" == '-r' ]
+    then
+        IFS=',' read -a array_add <<< "${add:4:-1}"
+        IFS=' ' # to default
 
-if [ "$options" == '_' ]
-  then
-    git commit -m $comments
-    git push $origin
-  elif [ "$options" != '_ammend' ]
+        folder_add=${array_add[0]}
+        unset array_add[0]
+
+        # recursive logic
+  elif [ "${add:0:1}" != '[' ]
     then
-      git commit "--${options:1}"
-      git push $origin
-  elif [ "$options" == '_force' ]
-    then
-      git commit -m $comments
-      git push "--${options:1}" $origin
-  elif [ "$options" == '_ammend:force' ]
-    then
-      git commit "--${options:1}"
-      git push "--${options:1}" $origin
+      echo "Parametrs 'git add' has been array..."
+      exit 0
   else
-    echo "Something is wrong"
+    IFS=',' read -a array_add <<< "${add:1:-1}"
+    IFS=' ' # to default
+fi
+
+
+if [ "$options" == '--commit' ]
+    then 
+        git commit -m "$comments"
+        git push "$origin"
+  elif [ "$options" == '--amend' ]
+    then
+        git commit ${options}
+        git push "$origin"
+  elif [ "$options" ==  '--force' ]
+    then
+        git push "$options" "$origin"
+  elif [ "$options" == '--force:amend' ] || [ "$options" == '--amend:force' ]
+    then
+      git commit --amend
+      git push --force "$origin"
+  else
+    echo "Something is wrong..."
+    exit 0
 fi
 
 # echo
