@@ -7,7 +7,7 @@ branch="${array_branches[0]}" # if specific branch => "'${array_branches[0]'"
 
 # read folder_name <<< `basename $(pwd)`
 read folder_name <<<$(basename $(pwd))
-origin="https://dzolotarenko:9c117vb@git.freshcode.org/agavrilenko/${folder_name}.git"
+origin="https://login:password@git.freshcode.org/username/${folder_name}.git"
 
 git_adds=()
 git_push_options=()
@@ -90,9 +90,7 @@ fi
 if [[ $git_commit_options ]]; then
     echo "	  => git commit $git_commit_options"
 fi
-if [[ ${git_push_options[0]} == "$origin" ]]; then
-  echo "	  => git push $branch"
-else
+if [[ ${git_push_options[0]} ]]; then
   echo "	  => git push ${git_push_options[0]} $branch"
 fi
 # if [[ $options ]] && [[ "$options" != '_' ]]; then
