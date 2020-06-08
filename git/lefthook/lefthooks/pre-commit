@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if [ "$LEFTHOOK" = "0" ]; then
+  exit 0
+fi
+
+
+cmd="lefthook run pre-commit $@"
+
+if npx lefthook >/dev/null 2>&1
+then
+  npx $cmd
+else
+  cd ./server
+  if npx lefthook >/dev/null 2>&1
+  then
+    npx $cmd
+  else
+    echo "Can't find lefthook in PATH"
+  fi
+fi

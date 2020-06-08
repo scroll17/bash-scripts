@@ -1,0 +1,59 @@
+type=$1
+exec=$2
+
+# @doc
+# { type = ['add'] }
+# { exec = "filename" }
+
+function moveHook() {
+   binH=$1
+   gitH=$2
+   hook=$3
+
+   if [ ! -f "$gitH/$hook" ]; then
+     cp "$binH"/"$hook" "$gitH/"
+     sudo chmod +x "$gitH"/"$hook"
+   else
+     rm  "$gitH"/"$hook"
+
+     cp "$binH"/"$hook" "$gitH/"
+     sudo chmod +x "$gitH"/"$hook"
+   fi
+}
+
+function initDir() {
+  nesting=$1
+  if [ $nesting == 5 ]; then
+    return
+  fi
+
+  read folderName <<<$(basename $(pwd))
+
+  if [ $folderName == "honey-shop" ]; then
+    return
+  elif [ $folderName != "honey-shop" ]; then
+    cd ../
+    initDir $(( $nesting + 1 ))
+  fi
+}
+
+initDir 0
+
+gitHooks="./.git/hooks"
+binLefthooks="./server/bin/lefthooks"
+
+if [ $exec ] && [ ! -f "$binLefthooks/$exec" ]; then
+    echo ""$exec" не существует"
+fi
+
+if [ $type == "add" ]; then
+  if [ $exec ]; then
+    moveHook $binLefthooks $gitHooks $exec
+  else
+    hooks=($(ls "$binLefthooks"))
+
+    for hook in "${hooks[@]}"; do
+      moveHook $binLefthooks $gitHooks $hook
+    done
+  fi
+fi

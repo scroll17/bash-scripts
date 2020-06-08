@@ -1,0 +1,30 @@
+#!/bin/sh
+
+if [ "$LEFTHOOK" = "0" ]; then
+  exit 0
+fi
+
+# lefthook_version: 7b655e550e5c652f665a1f2f38485ba7
+
+function execLefthook() {
+   cmd=$1
+   path=$2
+
+   if npx lefthook >/dev/null 2>&1
+   then
+     npx $cmd
+   else
+     if [ ! -f "$path" ]; then
+       echo "Can't find lefthook in PATH"
+     else
+       cd "$path"
+       execLefthook
+     fi
+   fi
+}
+
+cmd="lefthook install"
+execLefthook $cmd "./server"
+
+cmd="lefthook run prepare-commit-msg $@"
+execLefthook $cmd "./server"
